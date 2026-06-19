@@ -56,6 +56,46 @@ export const GET_PATTERN_QUERY = `
   }
 `;
 
+export const GET_TOPICS_QUERY = `
+  query GetTopics($track: String!) {
+    topics(track: $track) {
+      id
+      track
+      slug
+      title
+      summary
+      tags
+      order
+    }
+  }
+`;
+
+export const GET_TOPIC_QUERY = `
+  query GetTopic($track: String!, $slug: String!) {
+    topic(track: $track, slug: $slug) {
+      id
+      track
+      slug
+      title
+      summary
+      tags
+      order
+      blocks {
+        type
+        text
+        level
+        code
+        language
+        url
+        title
+        description
+        items
+        variant
+      }
+    }
+  }
+`;
+
 export const GET_QUESTION_QUERY = `
   query GetQuestion(
     $categorySlug: String!

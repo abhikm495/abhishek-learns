@@ -4,10 +4,14 @@ import { Pattern } from "@/models/Pattern";
 import { Question } from "@/models/Question";
 import { Solution } from "@/models/Solution";
 import { UseCase } from "@/models/UseCase";
+import { Topic } from "@/models/Topic";
+import { requireAdmin, type GraphQLContext } from "@/graphql/context";
 
 function toId(doc: { _id: unknown }) {
   return String(doc._id);
 }
+
+type Ctx = GraphQLContext;
 
 export const resolvers = {
   Category: {
@@ -60,6 +64,13 @@ export const resolvers = {
     pattern: async (parent: { patternId: unknown }) => {
       return Pattern.findById(parent.patternId);
     },
+  },
+
+  Topic: {
+    id: (parent: { _id: unknown }) => toId(parent),
+    summary: (parent: { summary?: string }) => parent.summary ?? "",
+    tags: (parent: { tags?: string[] }) => parent.tags ?? [],
+    blocks: (parent: { blocks?: unknown[] }) => parent.blocks ?? [],
   },
 
   Query: {
@@ -152,28 +163,56 @@ export const resolvers = {
         }),
       };
     },
+
+    topics: async (_: unknown, { track }: { track: string }) => {
+      await connectDB();
+      return Topic.find({ track }).sort({ order: 1, createdAt: 1 });
+    },
+
+    topic: async (_: unknown, { track, slug }: { track: string; slug: string }) => {
+      await connectDB();
+      return Topic.findOne({ track, slug });
+    },
+
+    topicById: async (_: unknown, { id }: { id: string }) => {
+      await connectDB();
+      return Topic.findById(id);
+    },
   },
 
   Mutation: {
-    createCategory: async (_: unknown, { input }: { input: Record<string, unknown> }) => {
+    createCategory: async (
+      _: unknown,
+      { input }: { input: Record<string, unknown> },
+      ctx: Ctx
+    ) => {
+      requireAdmin(ctx);
       await connectDB();
       return Category.create(input);
     },
 
-    createPattern: async (_: unknown, { input }: { input: Record<string, unknown> }) => {
+    createPattern: async (
+      _: unknown,
+      { input }: { input: Record<string, unknown> },
+      ctx: Ctx
+    ) => {
+      requireAdmin(ctx);
       await connectDB();
       return Pattern.create(input);
     },
 
     updatePattern: async (
       _: unknown,
-      { id, input }: { id: string; input: Record<string, unknown> }
+      { id, input }: { id: string; input: Record<string, unknown> },
+      ctx: Ctx
     ) => {
+      requireAdmin(ctx);
       await connectDB();
       return Pattern.findByIdAndUpdate(id, input, { new: true });
     },
 
-    deletePattern: async (_: unknown, { id }: { id: string }) => {
+    deletePattern: async (_: unknown, { id }: { id: string }, ctx: Ctx) => {
+      requireAdmin(ctx);
       await connectDB();
       const questions = await Question.find({ patternId: id });
       const questionIds = questions.map((q) => q._id);
@@ -184,31 +223,42 @@ export const resolvers = {
       return true;
     },
 
-    createQuestion: async (_: unknown, { input }: { input: Record<string, unknown> }) => {
+    createQuestion: async (
+      _: unknown,
+      { input }: { input: Record<string, unknown> },
+      ctx: Ctx
+    ) => {
+      requireAdmin(ctx);
       await connectDB();
       return Question.create(input);
     },
 
     updateQuestion: async (
       _: unknown,
-      { id, input }: { id: string; input: Record<string, unknown> }
+      { id, input }: { id: string; input: Record<string, unknown> },
+      ctx: Ctx
     ) => {
+      requireAdmin(ctx);
       await connectDB();
       return Question.findByIdAndUpdate(id, input, { new: true });
     },
 
     toggleQuestionCompleted: async (
       _: unknown,
-      { id, completed }: { id: string; completed: boolean }
+      { id, completed }: { id: string; completed: boolean },
+      ctx: Ctx
     ) => {
+      requireAdmin(ctx);
       await connectDB();
       return Question.findByIdAndUpdate(id, { completed }, { new: true });
     },
 
     toggleAllQuestionsCompleted: async (
       _: unknown,
-      { completed }: { completed: boolean }
+      { completed }: { completed: boolean },
+      ctx: Ctx
     ) => {
+      requireAdmin(ctx);
       await connectDB();
       const result = await Question.updateMany({}, { $set: { completed } });
       return result.modifiedCount;
@@ -216,58 +266,101 @@ export const resolvers = {
 
     togglePatternQuestionsCompleted: async (
       _: unknown,
-      { patternId, completed }: { patternId: string; completed: boolean }
+      { patternId, completed }: { patternId: string; completed: boolean },
+      ctx: Ctx
     ) => {
+      requireAdmin(ctx);
       await connectDB();
-      const result = await Question.updateMany(
-        { patternId },
-        { $set: { completed } }
-      );
+      const result = await Question.updateMany({ patternId }, { $set: { completed } });
       return result.modifiedCount;
     },
 
-    deleteQuestion: async (_: unknown, { id }: { id: string }) => {
+    deleteQuestion: async (_: unknown, { id }: { id: string }, ctx: Ctx) => {
+      requireAdmin(ctx);
       await connectDB();
       await Solution.deleteMany({ questionId: id });
       await Question.findByIdAndDelete(id);
       return true;
     },
 
-    createSolution: async (_: unknown, { input }: { input: Record<string, unknown> }) => {
+    createSolution: async (
+      _: unknown,
+      { input }: { input: Record<string, unknown> },
+      ctx: Ctx
+    ) => {
+      requireAdmin(ctx);
       await connectDB();
       return Solution.create(input);
     },
 
     updateSolution: async (
       _: unknown,
-      { id, input }: { id: string; input: Record<string, unknown> }
+      { id, input }: { id: string; input: Record<string, unknown> },
+      ctx: Ctx
     ) => {
+      requireAdmin(ctx);
       await connectDB();
       return Solution.findByIdAndUpdate(id, input, { new: true });
     },
 
-    deleteSolution: async (_: unknown, { id }: { id: string }) => {
+    deleteSolution: async (_: unknown, { id }: { id: string }, ctx: Ctx) => {
+      requireAdmin(ctx);
       await connectDB();
       await Solution.findByIdAndDelete(id);
       return true;
     },
 
-    createUseCase: async (_: unknown, { input }: { input: Record<string, unknown> }) => {
+    createUseCase: async (
+      _: unknown,
+      { input }: { input: Record<string, unknown> },
+      ctx: Ctx
+    ) => {
+      requireAdmin(ctx);
       await connectDB();
       return UseCase.create(input);
     },
 
     updateUseCase: async (
       _: unknown,
-      { id, input }: { id: string; input: Record<string, unknown> }
+      { id, input }: { id: string; input: Record<string, unknown> },
+      ctx: Ctx
     ) => {
+      requireAdmin(ctx);
       await connectDB();
       return UseCase.findByIdAndUpdate(id, input, { new: true });
     },
 
-    deleteUseCase: async (_: unknown, { id }: { id: string }) => {
+    deleteUseCase: async (_: unknown, { id }: { id: string }, ctx: Ctx) => {
+      requireAdmin(ctx);
       await connectDB();
       await UseCase.findByIdAndDelete(id);
+      return true;
+    },
+
+    createTopic: async (
+      _: unknown,
+      { input }: { input: Record<string, unknown> },
+      ctx: Ctx
+    ) => {
+      requireAdmin(ctx);
+      await connectDB();
+      return Topic.create(input);
+    },
+
+    updateTopic: async (
+      _: unknown,
+      { id, input }: { id: string; input: Record<string, unknown> },
+      ctx: Ctx
+    ) => {
+      requireAdmin(ctx);
+      await connectDB();
+      return Topic.findByIdAndUpdate(id, input, { new: true });
+    },
+
+    deleteTopic: async (_: unknown, { id }: { id: string }, ctx: Ctx) => {
+      requireAdmin(ctx);
+      await connectDB();
+      await Topic.findByIdAndDelete(id);
       return true;
     },
   },

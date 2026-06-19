@@ -256,3 +256,79 @@ export const TOGGLE_PATTERN_QUESTIONS_COMPLETED = gql`
     togglePatternQuestionsCompleted(patternId: $patternId, completed: $completed)
   }
 `;
+
+const TOPIC_BLOCK_FIELDS = `
+  blocks {
+    type
+    text
+    level
+    code
+    language
+    url
+    title
+    description
+    items
+    variant
+  }
+`;
+
+export const GET_TOPICS = gql`
+  query GetTopics($track: String!) {
+    topics(track: $track) {
+      id
+      track
+      slug
+      title
+      summary
+      tags
+      order
+    }
+  }
+`;
+
+export const GET_TOPIC_BY_ID = gql`
+  query GetTopicById($id: ID!) {
+    topicById(id: $id) {
+      id
+      track
+      slug
+      title
+      summary
+      tags
+      order
+      ${TOPIC_BLOCK_FIELDS}
+    }
+  }
+`;
+
+export const CREATE_TOPIC = gql`
+  mutation CreateTopic($input: CreateTopicInput!) {
+    createTopic(input: $input) {
+      id
+      track
+      slug
+      title
+    }
+  }
+`;
+
+export const UPDATE_TOPIC = gql`
+  mutation UpdateTopic($id: ID!, $input: UpdateTopicInput!) {
+    updateTopic(id: $id, input: $input) {
+      id
+      track
+      slug
+      title
+      summary
+      tags
+      order
+      ${TOPIC_BLOCK_FIELDS}
+    }
+  }
+`;
+
+export const DELETE_TOPIC = gql`
+  mutation DeleteTopic($id: ID!) {
+    deleteTopic(id: $id)
+  }
+`;

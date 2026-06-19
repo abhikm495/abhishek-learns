@@ -23,11 +23,19 @@ npm install
 cp .env.example .env
 ```
 
-Edit `.env` with your MongoDB URI (local or [MongoDB Atlas](https://www.mongodb.com/atlas)):
+Edit `.env` with your MongoDB URI (local or [MongoDB Atlas](https://www.mongodb.com/atlas)) and admin credentials:
 
 ```
 MONGODB_URI=mongodb://localhost:27017/abhishek-learns
+
+# Admin auth (quote the password if it contains # or spaces)
+ADMIN_PASSWORD="your-admin-password"
+# Generate: node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
+JWT_SECRET="a-long-random-string"
 ```
+
+The admin panel and all content mutations are protected. Visiting any `/admin` page prompts
+for `ADMIN_PASSWORD` once, then keeps you signed in for **30 days** via a signed JWT cookie.
 
 ### 3. Start MongoDB
 
@@ -137,8 +145,10 @@ git push -u origin main
 1. Go to [vercel.com/new](https://vercel.com/new)
 2. Import your GitHub repo
 3. Vercel auto-detects Next.js — no build settings needed
-4. Add **Environment Variable**:
+4. Add **Environment Variables**:
    - `MONGODB_URI` = your Atlas connection string
+   - `ADMIN_PASSWORD` = your admin password
+   - `JWT_SECRET` = a long random string (see generator command above)
 5. Deploy
 
 `VERCEL_URL` is set automatically — no need to configure `NEXT_PUBLIC_APP_URL` unless you add a custom domain later.

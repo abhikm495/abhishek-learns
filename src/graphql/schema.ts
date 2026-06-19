@@ -93,6 +93,62 @@ export const typeDefs = `#graphql
     pattern: Pattern
   }
 
+  type Block {
+    type: String!
+    text: String
+    level: Int
+    code: String
+    language: String
+    url: String
+    title: String
+    description: String
+    items: [String!]
+    variant: String
+  }
+
+  type Topic {
+    id: ID!
+    track: String!
+    slug: String!
+    title: String!
+    summary: String!
+    tags: [String!]!
+    order: Int!
+    blocks: [Block!]!
+  }
+
+  input BlockInput {
+    type: String!
+    text: String
+    level: Int
+    code: String
+    language: String
+    url: String
+    title: String
+    description: String
+    items: [String!]
+    variant: String
+  }
+
+  input CreateTopicInput {
+    track: String!
+    slug: String!
+    title: String!
+    summary: String
+    tags: [String!]
+    order: Int
+    blocks: [BlockInput!]
+  }
+
+  input UpdateTopicInput {
+    slug: String
+    title: String
+    summary: String
+    tags: [String!]
+    order: Int
+    blocks: [BlockInput!]
+  }
+
   input QuestionLinkInput {
     platform: String!
     url: String!
@@ -188,6 +244,9 @@ export const typeDefs = `#graphql
     questions(patternId: ID!): [Question!]!
     solutions(questionId: ID!): [Solution!]!
     dsaSheet: DSASheet!
+    topics(track: String!): [Topic!]!
+    topic(track: String!, slug: String!): Topic
+    topicById(id: ID!): Topic
   }
 
   type Mutation {
@@ -210,5 +269,9 @@ export const typeDefs = `#graphql
     createUseCase(input: CreateUseCaseInput!): UseCase!
     updateUseCase(id: ID!, input: UpdateUseCaseInput!): UseCase!
     deleteUseCase(id: ID!): Boolean!
+
+    createTopic(input: CreateTopicInput!): Topic!
+    updateTopic(id: ID!, input: UpdateTopicInput!): Topic!
+    deleteTopic(id: ID!): Boolean!
   }
 `;
