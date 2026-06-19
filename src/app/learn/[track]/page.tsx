@@ -2,18 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Badge } from "@/components/ui/Badge";
-import { graphqlFetch } from "@/lib/graphql-server";
-import { GET_TOPICS_QUERY } from "@/graphql/queryStrings";
+import { getTopicsByTrack } from "@/lib/data/get-topics";
 import { getTrack } from "@/lib/tracks";
-
-interface TopicListItem {
-  id: string;
-  slug: string;
-  title: string;
-  summary: string;
-  tags: string[];
-  order: number;
-}
 
 export async function generateMetadata({
   params,
@@ -34,13 +24,7 @@ export default async function TrackPage({
   const meta = getTrack(track);
   if (!meta) notFound();
 
-  let topics: TopicListItem[] = [];
-  try {
-    const data = await graphqlFetch<{ topics: TopicListItem[] }>(GET_TOPICS_QUERY, { track });
-    topics = data.topics;
-  } catch {
-    topics = [];
-  }
+  const topics = await getTopicsByTrack(track);
 
   return (
     <div className="space-y-10">

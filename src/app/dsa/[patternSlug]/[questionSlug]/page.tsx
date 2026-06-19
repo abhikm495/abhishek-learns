@@ -2,34 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
-import type { Solution } from "@/components/dsa/QuestionSolutions";
 import { QuestionSolutions } from "@/components/dsa/QuestionSolutions";
-import { graphqlFetch } from "@/lib/graphql-server";
-import { GET_QUESTION_QUERY } from "@/graphql/queryStrings";
-
-interface UseCase {
-  id: string;
-  title: string;
-  description: string;
-  techExample: string;
-  companyOrProduct?: string;
-}
-
-interface Question {
-  id: string;
-  slug: string;
-  title: string;
-  difficulty: "easy" | "medium" | "hard";
-  links: { platform: string; url: string; externalId?: string }[];
-  tags: string[];
-  pattern: {
-    id: string;
-    slug: string;
-    title: string;
-    useCases: UseCase[];
-  };
-  solutions: Solution[];
-}
+import { getQuestionBySlug } from "@/lib/data/get-dsa-question";
 
 const difficultyVariant = {
   easy: "easy" as const,
@@ -48,20 +22,7 @@ export default async function QuestionPage({
   params: Promise<{ patternSlug: string; questionSlug: string }>;
 }) {
   const { patternSlug, questionSlug } = await params;
-
-  let question: Question | null = null;
-
-  try {
-    const data = await graphqlFetch<{ question: Question | null }>(GET_QUESTION_QUERY, {
-      categorySlug: "dsa",
-      patternSlug,
-      questionSlug,
-    });
-    question = data.question;
-  } catch {
-    question = null;
-  }
-
+  const question = await getQuestionBySlug("dsa", patternSlug, questionSlug);
   if (!question) notFound();
 
   return (
@@ -123,3 +84,5 @@ export default async function QuestionPage({
     </div>
   );
 }
+
+export const dynamic = "force-dynamic";

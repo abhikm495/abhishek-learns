@@ -2,42 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { graphqlFetch } from "@/lib/graphql-server";
-import { GET_PATTERN_QUERY } from "@/graphql/queryStrings";
-
-interface QuestionLink {
-  platform: string;
-  url: string;
-  externalId?: string;
-}
-
-interface Question {
-  id: string;
-  slug: string;
-  title: string;
-  difficulty: "easy" | "medium" | "hard";
-  links: QuestionLink[];
-  tags: string[];
-  order: number;
-}
-
-interface UseCase {
-  id: string;
-  title: string;
-  description: string;
-  techExample: string;
-  companyOrProduct?: string;
-}
-
-interface Pattern {
-  id: string;
-  slug: string;
-  title: string;
-  description: string;
-  whenToUse: string[];
-  questions: Question[];
-  useCases: UseCase[];
-}
+import { getPatternBySlug } from "@/lib/data/get-dsa-pattern";
 
 const difficultyVariant = {
   easy: "easy" as const,
@@ -58,19 +23,7 @@ export default async function PatternPage({
   params: Promise<{ patternSlug: string }>;
 }) {
   const { patternSlug } = await params;
-
-  let pattern: Pattern | null = null;
-
-  try {
-    const data = await graphqlFetch<{ pattern: Pattern | null }>(GET_PATTERN_QUERY, {
-      categorySlug: "dsa",
-      patternSlug,
-    });
-    pattern = data.pattern;
-  } catch {
-    pattern = null;
-  }
-
+  const pattern = await getPatternBySlug("dsa", patternSlug);
   if (!pattern) notFound();
 
   return (
@@ -168,3 +121,5 @@ export default async function PatternPage({
     </div>
   );
 }
+
+export const dynamic = "force-dynamic";

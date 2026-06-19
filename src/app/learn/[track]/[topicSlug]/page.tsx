@@ -3,10 +3,8 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Badge } from "@/components/ui/Badge";
 import { BlockRenderer, headingId } from "@/components/notes/BlockRenderer";
-import { graphqlFetch } from "@/lib/graphql-server";
-import { GET_TOPIC_QUERY } from "@/graphql/queryStrings";
+import { getTopicBySlug } from "@/lib/data/get-topics";
 import { getTrack } from "@/lib/tracks";
-import type { Topic } from "@/lib/notes-types";
 
 export async function generateMetadata({
   params,
@@ -14,15 +12,8 @@ export async function generateMetadata({
   params: Promise<{ track: string; topicSlug: string }>;
 }): Promise<Metadata> {
   const { track, topicSlug } = await params;
-  try {
-    const data = await graphqlFetch<{ topic: Topic | null }>(GET_TOPIC_QUERY, {
-      track,
-      slug: topicSlug,
-    });
-    if (data.topic) return { title: `${data.topic.title} — Abhishek Learns` };
-  } catch {
-    // ignore
-  }
+  const topic = await getTopicBySlug(track, topicSlug);
+  if (topic) return { title: `${topic.title} — Abhishek Learns` };
   return { title: "Abhishek Learns" };
 }
 
@@ -35,17 +26,7 @@ export default async function TopicPage({
   const meta = getTrack(track);
   if (!meta) notFound();
 
-  let topic: Topic | null = null;
-  try {
-    const data = await graphqlFetch<{ topic: Topic | null }>(GET_TOPIC_QUERY, {
-      track,
-      slug: topicSlug,
-    });
-    topic = data.topic;
-  } catch {
-    topic = null;
-  }
-
+  const topic = await getTopicBySlug(track, topicSlug);
   if (!topic) notFound();
 
   const toc = topic.blocks
