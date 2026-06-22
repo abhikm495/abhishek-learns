@@ -1,7 +1,5 @@
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
-import { CodeBlock } from "@/components/CodeBlock";
-import { Markdown } from "@/components/Markdown";
 import {
   approachLabels,
   approachOrder,
@@ -15,7 +13,7 @@ function sortSolutions(list: SolutionData[]) {
   );
 }
 
-/** Server-rendered read-only solution list (no Apollo / client hooks). */
+/** Fully server-rendered solution list — no client components, no Apollo. */
 export function SolutionList({ solutions }: { solutions: SolutionData[] }) {
   const sorted = sortSolutions(solutions);
 
@@ -38,7 +36,9 @@ export function SolutionList({ solutions }: { solutions: SolutionData[] }) {
               <Badge variant="accent">{approachLabels[solution.approach]}</Badge>
             </div>
 
-            {solution.explanation && <Markdown content={solution.explanation} />}
+            {solution.explanation && (
+              <p className="text-sm leading-relaxed text-[var(--muted)]">{solution.explanation}</p>
+            )}
 
             {(solution.timeComplexity || solution.spaceComplexity) && (
               <div className="flex flex-wrap gap-4 text-sm">
@@ -61,7 +61,18 @@ export function SolutionList({ solutions }: { solutions: SolutionData[] }) {
               </div>
             )}
 
-            {solution.code && <CodeBlock code={solution.code} language="cpp" />}
+            {solution.code && (
+              <div className="overflow-hidden rounded-xl border border-[var(--card-border)]">
+                <div className="border-b border-[var(--card-border)] bg-[#161b22] px-4 py-2">
+                  <span className="text-xs font-medium uppercase tracking-wide text-[#8b949e]">
+                    cpp
+                  </span>
+                </div>
+                <pre className="overflow-x-auto bg-[#0d1117] p-4 text-sm leading-relaxed text-[#e6edf3]">
+                  <code>{solution.code}</code>
+                </pre>
+              </div>
+            )}
           </Card>
         ))}
       </div>
