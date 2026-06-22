@@ -12,14 +12,17 @@ import { Card } from "@/components/ui/Card";
 import { CodeBlock } from "@/components/CodeBlock";
 import { Markdown } from "@/components/Markdown";
 import { formatCpp } from "@/lib/format-cpp";
-import {
-  approachLabels,
-  approachOrder,
-  type Approach,
-  type SolutionData,
-} from "@/lib/dsa-types";
+import type { Approach, SolutionData } from "@/lib/dsa-types";
 
 export type { Approach, SolutionData as Solution } from "@/lib/dsa-types";
+
+const approachLabels: Record<Approach, string> = {
+  brute: "Brute Force",
+  better: "Better Approach",
+  optimal: "Optimal Solution",
+};
+
+const approachOrder: Record<Approach, number> = { brute: 0, better: 1, optimal: 2 };
 
 function sortSolutions(list: SolutionData[]) {
   return [...list].sort((a, b) => approachOrder[a.approach] - approachOrder[b.approach]);

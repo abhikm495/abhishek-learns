@@ -1,5 +1,4 @@
 import { SignJWT, jwtVerify } from "jose";
-import { cookies } from "next/headers";
 
 export const AUTH_COOKIE = "admin_token";
 
@@ -36,10 +35,4 @@ export async function verifyAdminToken(token: string | undefined | null): Promis
   } catch {
     return false;
   }
-}
-
-/** Server-side check for an active admin session cookie. */
-export async function isAdminSession(): Promise<boolean> {
-  const store = await cookies();
-  return verifyAdminToken(store.get(AUTH_COOKIE)?.value);
 }
