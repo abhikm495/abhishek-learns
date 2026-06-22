@@ -12,19 +12,9 @@ import { Card } from "@/components/ui/Card";
 import { CodeBlock } from "@/components/CodeBlock";
 import { Markdown } from "@/components/Markdown";
 import { formatCpp } from "@/lib/format-cpp";
+import type { Approach, SolutionData } from "@/lib/dsa-types";
 
-export type Approach = "brute" | "better" | "optimal";
-
-export interface Solution {
-  id: string;
-  approach: Approach;
-  title: string;
-  explanation: string;
-  code: string;
-  timeComplexity: string;
-  spaceComplexity: string;
-  order: number;
-}
+export type { Approach, SolutionData as Solution } from "@/lib/dsa-types";
 
 const approachLabels: Record<Approach, string> = {
   brute: "Brute Force",
@@ -34,7 +24,7 @@ const approachLabels: Record<Approach, string> = {
 
 const approachOrder: Record<Approach, number> = { brute: 0, better: 1, optimal: 2 };
 
-function sortSolutions(list: Solution[]) {
+function sortSolutions(list: SolutionData[]) {
   return [...list].sort((a, b) => approachOrder[a.approach] - approachOrder[b.approach]);
 }
 
@@ -204,9 +194,9 @@ export function QuestionSolutions({
   initialSolutions,
 }: {
   questionId: string;
-  initialSolutions: Solution[];
+  initialSolutions: SolutionData[];
 }) {
-  const [solutions, setSolutions] = useState<Solution[]>(sortSolutions(initialSolutions));
+  const [solutions, setSolutions] = useState<SolutionData[]>(sortSolutions(initialSolutions));
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
 

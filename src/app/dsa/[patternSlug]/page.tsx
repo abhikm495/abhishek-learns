@@ -4,6 +4,9 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { getPatternBySlug } from "@/lib/data/get-dsa-pattern";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 const difficultyVariant = {
   easy: "easy" as const,
   medium: "medium" as const,
@@ -23,7 +26,29 @@ export default async function PatternPage({
   params: Promise<{ patternSlug: string }>;
 }) {
   const { patternSlug } = await params;
-  const pattern = await getPatternBySlug("dsa", patternSlug);
+
+  let pattern = null;
+  let loadError: string | null = null;
+
+  try {
+    pattern = await getPatternBySlug("dsa", patternSlug);
+  } catch (err) {
+    console.error("[PatternPage] DB error:", err);
+    loadError = err instanceof Error ? err.message : "Database connection failed";
+  }
+
+  if (loadError) {
+    return (
+      <div className="space-y-4 rounded-xl border border-red-500/30 bg-red-500/10 p-6">
+        <h1 className="text-lg font-semibold text-red-600">Failed to load pattern</h1>
+        <p className="text-sm text-[var(--muted)]">{loadError}</p>
+        <Link href="/dsa" className="text-sm text-[var(--accent)] hover:underline">
+          ← Back to DSA sheet
+        </Link>
+      </div>
+    );
+  }
+
   if (!pattern) notFound();
 
   return (
@@ -121,5 +146,3 @@ export default async function PatternPage({
     </div>
   );
 }
-
-export const dynamic = "force-dynamic";

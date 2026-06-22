@@ -5,6 +5,9 @@ import { Card } from "@/components/ui/Card";
 import { QuestionSolutions } from "@/components/dsa/QuestionSolutions";
 import { getQuestionBySlug } from "@/lib/data/get-dsa-question";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 const difficultyVariant = {
   easy: "easy" as const,
   medium: "medium" as const,
@@ -22,7 +25,33 @@ export default async function QuestionPage({
   params: Promise<{ patternSlug: string; questionSlug: string }>;
 }) {
   const { patternSlug, questionSlug } = await params;
-  const question = await getQuestionBySlug("dsa", patternSlug, questionSlug);
+
+  let question = null;
+  let loadError: string | null = null;
+
+  try {
+    question = await getQuestionBySlug("dsa", patternSlug, questionSlug);
+  } catch (err) {
+    console.error("[QuestionPage] DB error:", err);
+    loadError = err instanceof Error ? err.message : "Database connection failed";
+  }
+
+  if (loadError) {
+    return (
+      <div className="space-y-4 rounded-xl border border-red-500/30 bg-red-500/10 p-6">
+        <h1 className="text-lg font-semibold text-red-600">Failed to load question</h1>
+        <p className="text-sm text-[var(--muted)]">{loadError}</p>
+        <p className="text-sm text-[var(--muted)]">
+          Check that <code className="rounded bg-[var(--background-subtle)] px-1">MONGODB_URI</code>{" "}
+          is set on Vercel and Atlas allows connections from anywhere (0.0.0.0/0).
+        </p>
+        <Link href={`/dsa/${patternSlug}`} className="text-sm text-[var(--accent)] hover:underline">
+          ← Back to pattern
+        </Link>
+      </div>
+    );
+  }
+
   if (!question) notFound();
 
   return (
@@ -84,5 +113,3 @@ export default async function QuestionPage({
     </div>
   );
 }
-
-export const dynamic = "force-dynamic";

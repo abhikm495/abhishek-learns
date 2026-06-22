@@ -4,7 +4,7 @@ import { Pattern } from "@/models/Pattern";
 import { Question } from "@/models/Question";
 import { Solution } from "@/models/Solution";
 import { UseCase } from "@/models/UseCase";
-import type { Approach } from "@/components/dsa/QuestionSolutions";
+import type { Approach } from "@/lib/dsa-types";
 
 export interface QuestionLink {
   platform: string;

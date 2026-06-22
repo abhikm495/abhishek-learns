@@ -6,6 +6,9 @@ import { BlockRenderer, headingId } from "@/components/notes/BlockRenderer";
 import { getTopicBySlug } from "@/lib/data/get-topics";
 import { getTrack } from "@/lib/tracks";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({
   params,
 }: {
@@ -26,7 +29,10 @@ export default async function TopicPage({
   const meta = getTrack(track);
   if (!meta) notFound();
 
-  const topic = await getTopicBySlug(track, topicSlug);
+  const topic = await getTopicBySlug(track, topicSlug).catch((err) => {
+    console.error("[TopicPage] DB error:", err);
+    return null;
+  });
   if (!topic) notFound();
 
   const toc = topic.blocks
@@ -93,5 +99,3 @@ export default async function TopicPage({
     </div>
   );
 }
-
-export const dynamic = "force-dynamic";

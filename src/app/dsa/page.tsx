@@ -7,6 +7,9 @@ export const metadata = {
   title: "DSA Sheet — Abhishek Learns",
 };
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 export default async function DSAPage() {
   let sheet;
 

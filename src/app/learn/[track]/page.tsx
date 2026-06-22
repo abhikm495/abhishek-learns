@@ -5,6 +5,9 @@ import { Badge } from "@/components/ui/Badge";
 import { getTopicsByTrack } from "@/lib/data/get-topics";
 import { getTrack } from "@/lib/tracks";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({
   params,
 }: {
@@ -24,7 +27,10 @@ export default async function TrackPage({
   const meta = getTrack(track);
   if (!meta) notFound();
 
-  const topics = await getTopicsByTrack(track);
+  const topics = await getTopicsByTrack(track).catch((err) => {
+    console.error("[TrackPage] DB error:", err);
+    return [];
+  });
 
   return (
     <div className="space-y-10">
@@ -98,5 +104,3 @@ export default async function TrackPage({
     </div>
   );
 }
-
-export const dynamic = "force-dynamic";
