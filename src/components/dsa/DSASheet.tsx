@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMutation } from "@apollo/client";
 import {
   TOGGLE_ALL_QUESTIONS_COMPLETED,
@@ -326,6 +327,7 @@ function PatternAccordion({
 }
 
 export function DSASheet({ initialData }: { initialData: DSASheet }) {
+  const router = useRouter();
   const [sheet, setSheet] = useState(initialData);
   const [openPatterns, setOpenPatterns] = useState<Set<string>>(new Set());
   const [bulkLoading, setBulkLoading] = useState(false);
@@ -333,6 +335,10 @@ export function DSASheet({ initialData }: { initialData: DSASheet }) {
   const [toggleCompleted] = useMutation(TOGGLE_QUESTION_COMPLETED);
   const [toggleAllCompleted] = useMutation(TOGGLE_ALL_QUESTIONS_COMPLETED);
   const [togglePatternCompleted] = useMutation(TOGGLE_PATTERN_QUESTIONS_COMPLETED);
+
+  useEffect(() => {
+    setSheet(initialData);
+  }, [initialData]);
 
   const stats = useMemo(() => {
     let easy = 0;
@@ -388,7 +394,11 @@ export function DSASheet({ initialData }: { initialData: DSASheet }) {
     });
 
     try {
-      await toggleCompleted({ variables: { id: questionId, completed } });
+      const { data } = await toggleCompleted({ variables: { id: questionId, completed } });
+      if (!data?.toggleQuestionCompleted) {
+        throw new Error("Toggle failed");
+      }
+      router.refresh();
     } catch {
       setSheet(prevSnapshot);
     }
@@ -400,7 +410,11 @@ export function DSASheet({ initialData }: { initialData: DSASheet }) {
     setSheet((prev) => applyCompletedToSheet(prev, completed));
 
     try {
-      await toggleAllCompleted({ variables: { completed } });
+      const { data } = await toggleAllCompleted({ variables: { completed } });
+      if (typeof data?.toggleAllQuestionsCompleted !== "number") {
+        throw new Error("Bulk toggle failed");
+      }
+      router.refresh();
     } catch {
       setSheet(prevSnapshot);
     } finally {
@@ -414,7 +428,11 @@ export function DSASheet({ initialData }: { initialData: DSASheet }) {
     setSheet((prev) => applyCompletedToSheet(prev, completed, patternId));
 
     try {
-      await togglePatternCompleted({ variables: { patternId, completed } });
+      const { data } = await togglePatternCompleted({ variables: { patternId, completed } });
+      if (typeof data?.togglePatternQuestionsCompleted !== "number") {
+        throw new Error("Pattern toggle failed");
+      }
+      router.refresh();
     } catch {
       setSheet(prevSnapshot);
     } finally {

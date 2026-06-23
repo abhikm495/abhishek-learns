@@ -6,6 +6,7 @@ function createApolloClient() {
   return new ApolloClient({
     link: new HttpLink({
       uri: "/api/graphql",
+      credentials: "same-origin",
       fetchOptions: { cache: "no-store" },
     }),
     cache: new InMemoryCache(),

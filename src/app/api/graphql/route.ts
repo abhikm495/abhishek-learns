@@ -6,6 +6,9 @@ import { AUTH_COOKIE, verifyAdminToken } from "@/lib/auth";
 import type { GraphQLContext } from "@/graphql/context";
 import type { NextRequest } from "next/server";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 const server = new ApolloServer<GraphQLContext>({
   typeDefs,
   resolvers,

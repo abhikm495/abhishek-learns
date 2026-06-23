@@ -245,20 +245,24 @@ export const resolvers = {
 
     toggleQuestionCompleted: async (
       _: unknown,
-      { id, completed }: { id: string; completed: boolean },
-      ctx: Ctx
+      { id, completed }: { id: string; completed: boolean }
     ) => {
-      requireAdmin(ctx);
       await connectDB();
-      return Question.findByIdAndUpdate(id, { completed }, { new: true });
+      const question = await Question.findByIdAndUpdate(
+        id,
+        { $set: { completed } },
+        { new: true }
+      );
+      if (!question) {
+        throw new Error(`Question not found: ${id}`);
+      }
+      return question;
     },
 
     toggleAllQuestionsCompleted: async (
       _: unknown,
-      { completed }: { completed: boolean },
-      ctx: Ctx
+      { completed }: { completed: boolean }
     ) => {
-      requireAdmin(ctx);
       await connectDB();
       const result = await Question.updateMany({}, { $set: { completed } });
       return result.modifiedCount;
@@ -266,10 +270,8 @@ export const resolvers = {
 
     togglePatternQuestionsCompleted: async (
       _: unknown,
-      { patternId, completed }: { patternId: string; completed: boolean },
-      ctx: Ctx
+      { patternId, completed }: { patternId: string; completed: boolean }
     ) => {
-      requireAdmin(ctx);
       await connectDB();
       const result = await Question.updateMany({ patternId }, { $set: { completed } });
       return result.modifiedCount;

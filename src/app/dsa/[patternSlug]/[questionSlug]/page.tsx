@@ -2,7 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
-import { QuestionSolutions } from "@/components/dsa/QuestionSolutions";
+import { SolutionList } from "@/components/dsa/SolutionList";
+import { isAdminSession } from "@/lib/auth";
 import { getQuestionBySlug } from "@/lib/data/get-dsa-question";
 
 export const runtime = "nodejs";
@@ -54,6 +55,8 @@ export default async function QuestionPage({
 
   if (!question) notFound();
 
+  const isAdmin = await isAdminSession();
+
   return (
     <div className="space-y-8">
       <div className="space-y-3">
@@ -92,8 +95,16 @@ export default async function QuestionPage({
         </div>
       </div>
 
-      <QuestionSolutions questionId={question.id} initialSolutions={question.solutions} />
+      {isAdmin && (
+        <Link
+          href={`/admin/questions/${question.id}`}
+          className="inline-flex text-sm font-medium text-[var(--accent)] hover:underline"
+        >
+          Edit question & solutions →
+        </Link>
+      )}
 
+      <SolutionList solutions={question.solutions} />
       {question.pattern.useCases.length > 0 && (
         <section className="space-y-4">
           <h2 className="text-xl font-semibold">Practical Use Cases in Tech</h2>
